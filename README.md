@@ -1,13 +1,13 @@
 # Multiclass Classification Algorithm
-A brief description of what this project does and who it's for.
 
-## Installation
-Instructions on how to install and set up the project.
+##Project Overview
+This project implements and compares two multiclass classification algorithms: one-vs-all and all-pairs. Both approaches were implemented using a binary classification model previously developed in coursework. The algorithms were evaluated to analyze their performance, advantages, and limitations.
 
-## Usage
-How to use the project, with examples
-
-The first thing people inspect in your repo is the readme file. The readme file should give an overview of the project, it states what python version and package versions were used to develop the code so others can run it locally and reproduce your results (add a yaml file for ease of use)ce, and a list of authors with contact info.
+##Objectives
+- Implement the one-vs-all and all-pairs algorithms for multiclass classification.
+- Use a binary classification model from prior homework assignments.
+- Compare and contrast the performance of the algorithms.
+- Provide detailed explanations of the methodology, including representation, loss, and optimization strategies
 
 ## Authors
 - Erica Brown (erica_brown3@brown.edu) 
