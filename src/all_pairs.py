@@ -1,5 +1,6 @@
+import numpy as np
 class AllPairsLogisticRegression:
-    def __init__(self, n_classes, binary_classifier_class, n_features, batch_size, conv_threshold):
+    def __init__(self, n_classes, binary_classifier_class, n_features, batch_size, epochs):
         """
         Initialize the all-pairs logistic regression model.
         @param n_classes: Number of classes in the dataset, an integer.
@@ -13,7 +14,7 @@ class AllPairsLogisticRegression:
         self.classifiers = {} 
         self.n_features = n_features
         self.batch_size = batch_size
-        self.conv_threshold = conv_threshold
+        self.epochs = epochs
         self.binary_classifier_class = binary_classifier_class
 
     def train(self, X, Y):
@@ -24,26 +25,20 @@ class AllPairsLogisticRegression:
         @param Y: Labels of the dataset, a numpy array of shape (n_samples,).
         @return: None
         """
-        for class_i in range(self.n_classes):
-            for class_j in range(class_i + 1, self.n_classes):
-                SX = []
-                SY = []
-                for t in range(len(Y)):
-                    if Y[t] == class_i:
-                        SX.append(X[t])
-                        SY.append(1)
-                    elif Y[t] == class_j:
-                        SX.append(X[t])
-                        SY.append(-1)
-                SX = np.array(SX)
-                SY = np.array(SY)
-                classifier = self.binary_classifier_class(
+        unique_classes = np.arange(self.n_classes)
+        pairs = [(class_i, class_j) for class_i in unique_classes for class_j in unique_classes if class_i < class_j]
+
+        for class_i, class_j in pairs:
+            mask = (Y == class_i) | (Y == class_j)
+            SX = X[mask]
+            SY = np.where(Y[mask] == class_i, 1, -1)
+            classifier = self.binary_classifier_class(
                     n_features=self.n_features,
                     batch_size=self.batch_size,
-                    conv_threshold=self.conv_threshold
+                    epochs=self.epochs
                 )
-                classifier.train(SX, SY)
-                self.classifiers[(class_i, class_j)] = classifier
+            classifier.train(SX, SY)
+            self.classifiers[(class_i, class_j)] = classifier
 
     def predict(self, X):
         """
