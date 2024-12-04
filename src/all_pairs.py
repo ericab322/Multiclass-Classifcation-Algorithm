@@ -2,7 +2,7 @@ import numpy as np
 class AllPairsLogisticRegression:
     def __init__(self, n_classes, binary_classifier_class, n_features, batch_size, epochs):
         """
-        Initialize the all-pairs logistic regression model.
+        Initialize the all-pairs logistic regression model approach.
         @param n_classes: Number of classes in the dataset, an integer.
         @param binary_classifier_class: Class for binary logistic regression, a class object.
         @param n_features: Number of features in the dataset, an integer.
@@ -22,7 +22,7 @@ class AllPairsLogisticRegression:
         Train the all-pairs logistic regression model by training binary classifiers
         for each pair of classes in the dataset.
         @param X: Input features of the dataset, a numpy array of shape (n_samples, n_features).
-        @param Y: Labels of the dataset, a numpy array of shape (n_samples,).
+        @param Y: Labels of the dataset, a numpy array of shape (n_samples).
         @return: None
         """
         unique_classes = np.arange(self.n_classes)
@@ -44,7 +44,7 @@ class AllPairsLogisticRegression:
         """
         Predict the class labels for the input data using the trained classifiers.
         @param X: Input features to classify, a numpy array of shape (n_samples, n_features).
-        @return: Predicted class labels, a numpy array of shape (n_samples,).
+        @return: Predicted class labels, a numpy array of shape (n_samples).
         """
         n_samples = X.shape[0]
         votes = np.zeros((n_samples, self.n_classes), dtype=int)
@@ -56,9 +56,9 @@ class AllPairsLogisticRegression:
 
     def accuracy(self, X, Y):
         """
-        Calculate the accuracy of the model on the input data and labels.
+        Calculate the accuracy of the model on the input data and labels by finding ratio of correct predictions to total samples.
         @param X: Input features of the dataset, a numpy array of shape (n_samples, n_features).
-        @param Y: True labels of the dataset, a numpy array of shape (n_samples,).
+        @param Y: True labels of the dataset, a numpy array of shape (n_samples).
         @return: Accuracy of the model as a float between 0 and 1.
         """
         predictions = self.predict(X)
