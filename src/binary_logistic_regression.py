@@ -38,7 +38,7 @@ class BinaryLogisticRegression:
         epochs = 0
         n_examples = X.shape[0]
 
-        for epoch in self.epochs:
+        for epoch in range(0, self.epochs):
             # update # of epochs
             # acquire indices for shuffling of X and Y
             indices = np.arange(n_examples)
@@ -96,6 +96,17 @@ class BinaryLogisticRegression:
         # multiply X by weights of model
         predictions = self.sigmoid(X @ self.weights.T)
         return np.where(predictions >= 0.5, 1, 0)
+        
+    def predict_probs(self, X):
+        '''
+        Compute prediction probabilities based on the learned weigths and examples X
+        @params:
+            X: a 2D Numpy array where each row contains an example, padded by 1 column for the bias
+        @return:
+            an array with sigmoid applied elementwise.
+        '''
+        predictions = self.sigmoid(X @ self.weights.T)
+        return predictions
 
     def accuracy(self, X, Y):
         '''
