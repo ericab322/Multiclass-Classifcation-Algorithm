@@ -55,7 +55,7 @@ class BinaryLogisticRegression:
                 grad = np.zeros(self.weights.shape)
                 # for each pair in the batch
                 for x, y in zip(X_batch, Y_batch):
-                    prediction = self.sigmoid(np.dot(self.weights, x))
+                    prediction = self.sigmoid(self.weights @ x) #np.dot(self.weights, x))
                     # gradient calculation
                     error = prediction - y
                     grad += error * x
@@ -74,10 +74,10 @@ class BinaryLogisticRegression:
         '''
         n_examples = X.shape[0]
         total_loss = 0
-        
+
         for i in range(n_examples):
             # linear output (dot product)
-            linear_output = np.dot(self.weights, X[i])
+            linear_output = X[i] @ self.weights.T  #np.dot(self.weights, X[i].T)
             # calc logistic loss for each sample
             y = 1 if Y[i] == 1 else -1
             logistic_loss = np.log(1 + np.exp(-y * linear_output))
