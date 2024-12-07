@@ -6,6 +6,7 @@ This project implements and compares two multiclass classification algorithms: o
 ## Objectives
 - Implement the one-vs-all and all-pairs algorithms for multiclass classification.
 - Use a binary classification model from prior homework assignments.
+- Apply these algorithms to an obesity risk dataset to classify risk categories.
 - Compare and contrast the performance of the algorithms.
 - Provide detailed explanations of the methodology, including representation, loss, and optimization strategies
 
