@@ -1,18 +1,21 @@
 import numpy as np
 
 class BinaryLogisticRegression:
-    def __init__(self, n_features, batch_size, epochs):
+    def __init__(self, n_features, batch_size, epochs, random_state = None):
         """Initialize the binary logistic regression model.
         @param n_features: Number of features in the dataset, an integer.
         @param batch_size: Batch size for training, an integer.
         @param conv_threshold: Convergence threshold for training, a float.
         @return: None
         """
+
         self.n_features = n_features
         self.weights = np.zeros(n_features + 1)  # extra element for bias
         self.alpha = 0.03
         self.batch_size = batch_size
         self.epochs = epochs
+        if random_state is not None:
+            np.random.seed(random_state)
 
     def sigmoid(self, z):
         '''
@@ -25,7 +28,7 @@ class BinaryLogisticRegression:
         return 1 / (1 + np.exp(-z))
 
     def train(self, X, Y):
-        '''
+        '''self.epochs
         Trains the model using stochastic gradient descent
         @params:
             X: a 2D Numpy array where each row contains an example, padded by 1 column for the bias
@@ -37,19 +40,20 @@ class BinaryLogisticRegression:
         converge = False
         epochs = 0
         n_examples = X.shape[0]
+        X_bias = np.hstack([X, np.ones((X.shape[0], 1))])  # Append bias term
 
         for epoch in range(0, self.epochs):
             # update # of epochs
             # acquire indices for shuffling of X and Y
             indices = np.arange(n_examples)
             np.random.shuffle(indices)
-            X = X[indices]
+            X_bias = X_bias[indices]
             Y = Y[indices]
             # calc last epoch loss
             last_epoch_loss = self.loss(X, Y)
             # for the # of batches
             for i in range(0, n_examples, self.batch_size):
-                X_batch = X[i:i + self.batch_size]
+                X_batch = X_bias[i:i + self.batch_size]
                 Y_batch = Y[i:i + self.batch_size]
                 # reinitialize gradient to be 0s
                 grad = np.zeros(self.weights.shape)
@@ -72,6 +76,7 @@ class BinaryLogisticRegression:
         @return:
             A float number which is the average loss of the model on the dataset
         '''
+        X = np.hstack([X, np.ones((X.shape[0], 1))])  # Append bias term
         n_examples = X.shape[0]
         total_loss = 0
 
@@ -94,6 +99,7 @@ class BinaryLogisticRegression:
             A 1D Numpy array with one element for each row in X containing the predicted class.
         '''
         # multiply X by weights of model
+        X = np.hstack([X, np.ones((X.shape[0], 1))])  # Append bias term
         predictions = self.sigmoid(X @ self.weights.T)
         return np.where(predictions >= 0.5, 1, 0)
         
@@ -105,6 +111,7 @@ class BinaryLogisticRegression:
         @return:
             an array with sigmoid applied elementwise.
         '''
+        X = np.hstack([X, np.ones((X.shape[0], 1))])  # Append bias term
         predictions = self.sigmoid(X @ self.weights.T)
         return predictions
 
