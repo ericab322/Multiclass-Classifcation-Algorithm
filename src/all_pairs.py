@@ -10,6 +10,17 @@ class AllPairsLogisticRegression:
         @param conv_threshold: Convergence threshold for training, a float.
         @return: None
         """
+        if not isinstance(n_classes, int) or n_classes <= 1:
+            raise ValueError("`n_classes` must be an integer greater than 1.")
+        if not isinstance(epochs, int) or epochs <= 0:
+            raise ValueError("`epochs` must be an integer greater than 0.")
+        if not callable(binary_classifier_class):
+            raise TypeError("`binary_classifier_class` must be a callable class.")
+        if not isinstance(n_features, int) or n_features <= 0:
+            raise ValueError("`n_features` must be a positive integer.")
+        if not isinstance(batch_size, int) or batch_size <= 0:
+            raise ValueError("`batch_size` must be a positive integer.")
+        
         self.n_classes = n_classes
         self.classifiers = {} 
         self.n_features = n_features
@@ -25,6 +36,12 @@ class AllPairsLogisticRegression:
         @param Y: Labels of the dataset, a numpy array of shape (n_samples).
         @return: None
         """
+        if X.size == 0 or Y.size == 0:
+            raise ValueError("Input data `X` and labels `Y` cannot be empty.")
+        if X.shape[0] != Y.shape[0]:
+            raise ValueError("Mismatch in number of samples between `X` and `Y`.")
+        if np.any((Y < 0) | (Y >= self.n_classes)):
+            raise ValueError(f"Labels in `Y` must be in the range [0, {self.n_classes - 1}].")
         unique_classes = np.arange(self.n_classes)
         pairs = [(class_i, class_j) for class_i in unique_classes for class_j in unique_classes if class_i < class_j]
 
@@ -46,6 +63,11 @@ class AllPairsLogisticRegression:
         @param X: Input features to classify, a numpy array of shape (n_samples, n_features).
         @return: Predicted class labels, a numpy array of shape (n_samples).
         """
+        if X.size == 0:
+            raise ValueError("Input data `X` cannot be empty.")
+        if X.shape[1] != self.n_features:
+            raise ValueError(f"`X` must have {self.n_features} features.")
+        
         n_samples = X.shape[0]
         votes = np.zeros((n_samples, self.n_classes), dtype=int)
         for (class_i, class_j), classifier in self.classifiers.items():
@@ -61,6 +83,11 @@ class AllPairsLogisticRegression:
         @param Y: True labels of the dataset, a numpy array of shape (n_samples).
         @return: Accuracy of the model as a float between 0 and 1.
         """
+        if X.size == 0 or Y.size == 0:
+            raise ValueError("Input data `X` and labels `Y` cannot be empty.")
+        if X.shape[0] != Y.shape[0]:
+            raise ValueError("Mismatch in number of samples between `X` and `Y`.")
+        
         predictions = self.predict(X)
         correct_predictions = np.sum(predictions == Y)
         return correct_predictions / len(Y)
