@@ -1,6 +1,6 @@
 import numpy as np
 class AllPairsLogisticRegression:
-    def __init__(self, n_classes, binary_classifier_class, n_features, batch_size, epochs):
+    def __init__(self, n_classes, binary_classifier_class, n_features, batch_size, epochs, random_state=None):
         """
         Initialize the all-pairs logistic regression model approach.
         @param n_classes: Number of classes in the dataset, an integer.
@@ -26,6 +26,7 @@ class AllPairsLogisticRegression:
         self.n_features = n_features
         self.batch_size = batch_size
         self.epochs = epochs
+        self.random_state = random_state
         self.binary_classifier_class = binary_classifier_class
 
     def train(self, X, Y):
@@ -48,11 +49,11 @@ class AllPairsLogisticRegression:
         for class_i, class_j in pairs:
             mask = (Y == class_i) | (Y == class_j)
             SX = X[mask]
-            SY = np.where(Y[mask] == class_i, 1, -1)
+            SY = np.where(Y[mask] == class_i, 1, 0)
             classifier = self.binary_classifier_class(
                     n_features=self.n_features,
                     batch_size=self.batch_size,
-                    epochs=self.epochs
+                    conv_threshold = 1e06
                 )
             classifier.train(SX, SY)
             self.classifiers[(class_i, class_j)] = classifier
