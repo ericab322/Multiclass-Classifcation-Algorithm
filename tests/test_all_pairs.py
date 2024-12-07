@@ -12,16 +12,17 @@ class TestAllPairsLogisticRegression(unittest.TestCase):
         """Set up the model and training data."""
         self.model = AllPairsLogisticRegression(
             n_classes=3,
-            n_features=2,
+            n_features=3,
             batch_size=1,
             epochs=100,
             binary_classifier_class=BinaryLogisticRegression
         )
-        self.X_train = np.array([
-            [1, 2], [2, 1], [2, 2],  
-            [3, 4], [4, 3], [4, 4],  
-            [5, 6], [6, 5], [6, 6]   
+        X = np.array([
+        [1, 2], [2, 1], [2, 2],  
+        [3, 4], [4, 3], [4, 4],  
+        [5, 6], [6, 5], [6, 6]   
         ])
+        self.X_train = np.hstack([np.ones((X.shape[0], 1)), X])
         self.Y_train = np.array([0, 0, 0, 1, 1, 1, 2, 2, 2])
         self.model.train(self.X_train, self.Y_train)
 
@@ -42,11 +43,12 @@ class TestAllPairsLogisticRegression(unittest.TestCase):
 
     def test_predict_on_unseen_data(self):
         """Test predictions on unseen testing data."""
-        X_test = np.array([
-            [2, 3],  
-            [3.5, 3.5],  
-            [5.5, 5.5]  
+        X_raw_test = np.array([
+        [2, 3],  
+        [3.5, 3.5],  
+        [5.5, 5.5]  
         ])
+        X_test = np.hstack([np.ones((X_raw_test.shape[0], 1)), X_raw_test])
         expected_predictions = np.array([0, 1, 2])
         predictions = self.model.predict(X_test)
         np.testing.assert_array_equal(predictions, expected_predictions)
