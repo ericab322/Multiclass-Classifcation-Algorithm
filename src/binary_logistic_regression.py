@@ -1,18 +1,29 @@
 import numpy as np
 
 class BinaryLogisticRegression:
-    def __init__(self, n_features, batch_size, epochs):
+    def __init__(self, n_features, batch_size, conv_threshold, random_state = None):
         """Initialize the binary logistic regression model.
         @param n_features: Number of features in the dataset, an integer.
         @param batch_size: Batch size for training, an integer.
         @param conv_threshold: Convergence threshold for training, a float.
         @return: None
         """
+        if not isinstance(n_features, int) or n_features <= 0:
+            raise ValueError("`n_features` must be a positive integer.")
+        if not isinstance(batch_size, int) or batch_size <= 0:
+            raise ValueError("`batch_size` must be a positive integer.")
+        if not isinstance(conv_threshold, (int, float)) or conv_threshold <= 0:
+            raise ValueError("`conv_threshold` must be a positive number.")
+        if random_state is not None and not isinstance(random_state, int):
+            raise ValueError("`random_state` must be an integer or None.")
+            
         self.n_features = n_features
         self.weights = np.zeros(n_features + 1)  # extra element for bias
         self.alpha = 0.03
         self.batch_size = batch_size
-        self.epochs = epochs
+        self.conv_threshold = conv_threshold
+        if random_state is not None:
+            np.random.seed(random_state)
 
     def sigmoid(self, z):
         '''
@@ -25,7 +36,7 @@ class BinaryLogisticRegression:
         return 1 / (1 + np.exp(-z))
 
     def train(self, X, Y):
-        '''
+        '''self.epochs
         Trains the model using stochastic gradient descent
         @params:
             X: a 2D Numpy array where each row contains an example, padded by 1 column for the bias
@@ -33,23 +44,36 @@ class BinaryLogisticRegression:
         @return:
             num_epochs: integer representing the number of epochs taken to reach convergence
         '''
+        if not isinstance(X, np.ndarray) or not isinstance(Y, np.ndarray):
+            raise TypeError("`X` and `Y` must be Numpy arrays.")
+        if X.size == 0 or Y.size == 0:
+            raise ValueError("`X` and `Y` cannot be empty.")
+        if X.shape[0] != Y.shape[0]:
+            raise ValueError("mismatch in # of samples between `X` and `Y`.")
+        if X.shape[1] != self.n_features:
+            raise ValueError(f"`X` must have {self.n_features} features.")
+        if not np.array_equal(Y, Y.astype(int)) or not np.all((Y == 0) | (Y == 1)):
+            raise ValueError("`Y` must contain binary labels (0 or 1).")
+
         # intializing values
         converge = False
         epochs = 0
         n_examples = X.shape[0]
+        X_bias = np.hstack([X, np.ones((X.shape[0], 1))])  # Append bias term
 
-        for epoch in range(0, self.epochs):
+        while not converge:
             # update # of epochs
+            epochs +=1
             # acquire indices for shuffling of X and Y
             indices = np.arange(n_examples)
             np.random.shuffle(indices)
-            X = X[indices]
+            X_bias = X_bias[indices]
             Y = Y[indices]
             # calc last epoch loss
             last_epoch_loss = self.loss(X, Y)
             # for the # of batches
             for i in range(0, n_examples, self.batch_size):
-                X_batch = X[i:i + self.batch_size]
+                X_batch = X_bias[i:i + self.batch_size]
                 Y_batch = Y[i:i + self.batch_size]
                 # reinitialize gradient to be 0s
                 grad = np.zeros(self.weights.shape)
@@ -62,6 +86,9 @@ class BinaryLogisticRegression:
                 # update weights
                 self.weights -= ((self.alpha * grad)/ self.batch_size)
             epoch_loss = self.loss(X, Y)
+            if abs(epoch_loss - last_epoch_loss) < self.conv_threshold:
+                converge = True
+        return epochs
 
     def loss(self, X, Y):
         '''
@@ -72,6 +99,18 @@ class BinaryLogisticRegression:
         @return:
             A float number which is the average loss of the model on the dataset
         '''
+        if not isinstance(X, np.ndarray) or not isinstance(Y, np.ndarray):
+            raise TypeError("`X` and `Y` must be Numpy arrays.")
+        if X.size == 0 or Y.size == 0:
+            raise ValueError("`X` and `Y` cannot be empty.")
+        if X.shape[0] != Y.shape[0]:
+            raise ValueError("mismatch in # of samples between `X` and `Y`.")
+        if X.shape[1] != self.n_features:
+            raise ValueError(f"`X` must have {self.n_features} features.")
+        if not np.array_equal(Y, Y.astype(int)) or not np.all((Y == 0) | (Y == 1)):
+            raise ValueError("`Y` must contain binary labels (0 or 1).")
+        
+        X = np.hstack([X, np.ones((X.shape[0], 1))])  # Append bias term
         n_examples = X.shape[0]
         total_loss = 0
 
@@ -93,7 +132,15 @@ class BinaryLogisticRegression:
         @return:
             A 1D Numpy array with one element for each row in X containing the predicted class.
         '''
+        if not isinstance(X, np.ndarray):
+            raise TypeError("`X` must be a Numpy array.")
+        if X.size == 0:
+            raise ValueError("`X` cannot be empty.")
+        if X.shape[1] != self.n_features:
+            raise ValueError(f"`X` must have {self.n_features} features.")
+            
         # multiply X by weights of model
+        X = np.hstack([X, np.ones((X.shape[0], 1))])  # Append bias term
         predictions = self.sigmoid(X @ self.weights.T)
         return np.where(predictions >= 0.5, 1, 0)
         
@@ -105,6 +152,14 @@ class BinaryLogisticRegression:
         @return:
             an array with sigmoid applied elementwise.
         '''
+        if not isinstance(X, np.ndarray):
+            raise TypeError("`X` must be a Numpy array.")
+        if X.size == 0:
+            raise ValueError("`X` cannot be empty.")
+        if X.shape[1] != self.n_features:
+            raise ValueError(f"`X` must have {self.n_features} features.")
+            
+        X = np.hstack([X, np.ones((X.shape[0], 1))])  # Append bias term
         predictions = self.sigmoid(X @ self.weights.T)
         return predictions
 
@@ -117,6 +172,15 @@ class BinaryLogisticRegression:
         @return:
             a float number indicating accuracy (between 0 and 1)
         '''
+        if not isinstance(X, np.ndarray) or not isinstance(Y, np.ndarray):
+            raise TypeError("`X` and `Y` must be Numpy arrays.")
+        if X.size == 0 or Y.size == 0:
+            raise ValueError("`X` and `Y` cannot be empty.")
+        if X.shape[0] != Y.shape[0]:
+            raise ValueError("mismatch in # of samples between `X` and `Y`.")
+        if X.shape[1] != self.n_features:
+            raise ValueError(f"`X` must have {self.n_features} features.")
+
         predictions = self.predict(X)
         accuracy = np.mean(predictions == Y)
         return accuracy
