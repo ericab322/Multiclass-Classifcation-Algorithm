@@ -1,7 +1,7 @@
 import numpy as np
 
 class OneVsAllLogisticRegression:
-    def __init__(self, n_classes, binary_classifier_class, n_features, batch_size, epochs, random_state = None):
+    def __init__(self, n_classes, binary_classifier_class, n_features, batch_size, max_epochs = 100, conv_threshold = 1e-6, random_state = None):
         """
         Initialize the One-vs-All logistic regression model.
         @param n_classes: Number of classes in the dataset, an integer.
@@ -14,7 +14,7 @@ class OneVsAllLogisticRegression:
 
         if not isinstance(n_classes, int) or n_classes <= 1:
             raise ValueError("`n_classes` must be an integer greater than 1.")
-        if not isinstance(epochs, int) or epochs <= 0:
+        if not isinstance(max_epochs, int) or max_epochs <= 0:
             raise ValueError("`epochs` must be an integer greater than 0.")
         if not callable(binary_classifier_class):
             raise TypeError("`binary_classifier_class` must be a callable class.")
@@ -22,12 +22,17 @@ class OneVsAllLogisticRegression:
             raise ValueError("`n_features` must be a positive integer.")
         if not isinstance(batch_size, int) or batch_size <= 0:
             raise ValueError("`batch_size` must be a positive integer.")
-      
+        if not isinstance(max_epochs, int) or max_epochs <= 0:
+                raise ValueError("`max_epochs` must be a positive number.")
+        if not isinstance(conv_threshold, (int, float)) or conv_threshold <= 0:
+            raise ValueError("`conv_threshold` must be a positive number.")
+        
         self.n_classes = n_classes
         self.classifiers = {}  
         self.n_features = n_features
         self.batch_size = batch_size
-        self.epochs = epochs 
+        self.max_epochs = max_epochs 
+        self.conv_threshold = conv_threshold
         self.binary_classifier_class = binary_classifier_class
         self.random_state = random_state
         
@@ -54,7 +59,8 @@ class OneVsAllLogisticRegression:
             classifier = self.binary_classifier_class(
                 n_features=self.n_features,
                 batch_size=self.batch_size,
-                epochs=self.epochs, random_state=self.random_state
+                max_epochs=self.max_epochs, random_state=self.random_state,
+                conv_threshold = self.conv_threshold
             )
             classifier.train(X, binary_labels)
             self.classifiers[class_i] = classifier

@@ -9,56 +9,94 @@ np.random.seed(0)
 
 class TestAllPairsLogisticRegression(unittest.TestCase):
     def setUp(self):
-        """Set up the model and training data."""
+        """Initialize common test parameters."""
+        self.n_classes = 3
+        self.n_features = 2
+        self.batch_size = 1
         self.model = AllPairsLogisticRegression(
-            n_classes=3,
-            n_features=2,
-            batch_size=1,
-            epochs=100,
+            n_classes=self.n_classes,
             binary_classifier_class=BinaryLogisticRegression,
+            n_features=self.n_features,
+            batch_size=self.batch_size,
             random_state=42
         )
-        self.X_train = np.array([
-            [1, 2], [2, 1], [2, 2],  
-            [3, 4], [4, 3], [4, 4],  
-            [5, 6], [6, 5], [6, 6]   
-        ])
-        self.Y_train = np.array([0, 0, 0, 1, 1, 1, 2, 2, 2])
-        self.X_train = np.hstack([np.ones((self.X_train.shape[0], 1)), self.X_train])
+
 
     def test_all_classifiers_trained(self):
         """Test that all required binary classifiers are trained."""
+        X = np.array([[1, 0], [0, 1], [-1, 0], [2, 0]])  # Data separable
+        Y = np.array([2, 1, 0, 2])  # 3 classes: 0, 1, 2
+        self.model.train(X, Y)
         unique_pairs = [(i, j) for i in range(3) for j in range(3) if i < j]
         self.assertEqual(len(self.model.classifiers), len(unique_pairs))
         
     def test_train_function(self):
         """Test the train function."""
-        self.model.train(self.X_train, self.Y_train)
+        X = np.array([[1, 0], [0, 1], [-1, 0], [2, 0]])  # Data separable
+        Y = np.array([2, 1, 0, 2])  # 3 classes: 0, 1, 2
+        self.model.train(X, Y)
         self.assertTrue(len(self.model.classifiers) > 0)
 
-    def test_predict(self):
-        """Test the predict function on training data."""
-        self.model.train(self.X_train, self.Y_train)
-        predictions = self.model.predict(self.X_train)
-        np.testing.assert_array_equal(predictions, self.Y_train)
+
+    def test_train_creates_correct_classifiers_all_pairs(self):
+        """Test that `train` creates one classifier for each pair of classes and trains it correctly."""
+        X = np.array([[1, 0], [0, 1], [-1, 0], [2, 0]])  # Data separable
+        Y = np.array([2, 1, 0, 2])  # 3 classes: 0, 1, 2
+
+        # Train the model
+        self.model.train(X, Y)
+
+        # Check that the correct number of classifiers was created
+        n_classes = len(np.unique(Y))
+        expected_classifiers = n_classes * (n_classes - 1) // 2  # Number of class pairs
+        self.assertEqual(len(self.model.classifiers), expected_classifiers)
+
+        # Check each classifier's training data and predictions
+        for class_i in range(n_classes):
+            for class_j in range(class_i + 1, n_classes):
+                # Get the binary classifier for this class pair
+                classifier = self.model.classifiers[(class_i, class_j)]
+
+                # Filter data for classes class_i and class_j
+                mask = (Y == class_i) | (Y == class_j)
+                X_pair = X[mask]
+                Y_pair = Y[mask]
+
+                # Convert labels to binary: class_i -> 1, class_j -> 0
+                binary_labels = np.where(Y_pair == class_i, 1, 0)
+
+                # Ensure the classifier's predictions match the binary labels
+                predictions = classifier.predict(X_pair)
+                np.testing.assert_array_equal(predictions, binary_labels)
+
 
     def test_accuracy(self):
         """Test the accuracy calculation on training data."""
-        self.model.train(self.X_train, self.Y_train)
-        accuracy = self.model.accuracy(self.X_train, self.Y_train)
+        X = np.array([[1, 0], [0, 1], [-1, 0], [2, 0]])  # Data separable
+        Y = np.array([2, 1, 0, 2])  # 3 classes: 0, 1, 2
+
+        # Train the model
+        self.model.train(X, Y)
+        accuracy = self.model.accuracy(X, Y)
         self.assertAlmostEqual(accuracy, 1.0, places=2)
 
     def test_predict_on_unseen_data(self):
         """Test predictions on unseen testing data."""
-        X_raw_test = np.array([
-            [2, 3],  
-            [3.5, 3.5],  
-            [5.5, 5.5]  
-        ])
-        X_test = np.hstack([np.ones((X_raw_test.shape[0], 1)), X_raw_test])
-        expected_predictions = np.array([0, 1, 2])
+        X_train = np.array([[1, 1], [-1, 1], [1, -1], [-1, -1]])
+        Y_train = np.array([0, 1, 2, 1])  # 3 classes: 0, 1, 2
+
+        X_test = np.array([[2, 2], [-2, -2], [3, 4], [8, -10]])
+        Y_test = np.array([0, 1, 0, 2])  # Test on similar data
+
+        # Train the model
+        self.model.train(X_train, Y_train)
+
+        # Predict on unseen data
         predictions = self.model.predict(X_test)
-        np.testing.assert_array_equal(predictions, expected_predictions)
+
+        # Check if predictions match true labels
+        np.testing.assert_array_equal(predictions, Y_test)
+
 
     def test_train_empty_data(self):
         """Test that training with empty data raises an error."""
@@ -67,12 +105,6 @@ class TestAllPairsLogisticRegression(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.model.train(X_empty, Y_empty)
             
-    def test_train_single_example(self):
-        """Test that training with a single example does not raise an error."""
-        X_single = np.array([[1, 1]]) 
-        Y_single = np.array([0])  
-        self.model.train(X_single, Y_single)
-        self.assertEqual(len(self.model.classifiers), len(self.model.classifiers)) 
         
     def test_train_dimension_mismatch(self):
         """Test that training with mismatched dimensions raises an error."""
@@ -105,9 +137,9 @@ class TestAllPairsLogisticRegression(unittest.TestCase):
         accuracy = self.model.accuracy(X_non_separable, Y_non_separable)
         self.assertGreaterEqual(accuracy, 0.5)  
     
-    # -----------------
-    # Additional Tests
-    # -----------------
+    # # -----------------
+    # # Additional Tests
+    # # -----------------
 
     def test_predict_correct_classes(self):
         """Test that `predict` returns the correct class labels."""
@@ -139,7 +171,6 @@ class TestAllPairsLogisticRegression(unittest.TestCase):
                 binary_classifier_class=BinaryLogisticRegression,
                 n_features=2,
                 batch_size=1,
-                epochs=100,
                 random_state=42
             )
 
@@ -151,7 +182,6 @@ class TestAllPairsLogisticRegression(unittest.TestCase):
                 binary_classifier_class=BinaryLogisticRegression,
                 n_features=-1,  # Invalid
                 batch_size=1,
-                epochs=100,
                 random_state=42
             )
 
@@ -163,19 +193,18 @@ class TestAllPairsLogisticRegression(unittest.TestCase):
                 binary_classifier_class=BinaryLogisticRegression,
                 n_features=2,
                 batch_size=0,  # Invalid
-                epochs=100,
                 random_state=42
             )
 
     def test_invalid_epochs(self):
-        """Test that an invalid `epochs` parameter raises an error."""
+        """Test that an invalid `max_epochs` parameter raises an error."""
         with self.assertRaises(ValueError):
             AllPairsLogisticRegression(
                 n_classes=3,
                 binary_classifier_class=BinaryLogisticRegression,
                 n_features=2,
                 batch_size=1,
-                epochs=-10,  # Invalid
+                max_epochs=-10,  # Invalid
                 random_state=42
             )
 

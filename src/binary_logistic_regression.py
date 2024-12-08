@@ -1,7 +1,7 @@
 import numpy as np
 
 class BinaryLogisticRegression:
-    def __init__(self, n_features, batch_size, conv_threshold, random_state = None):
+    def __init__(self, n_features, batch_size, conv_threshold = 1e-6, max_epochs = 100, random_state = None):
         """Initialize the binary logistic regression model.
         @param n_features: Number of features in the dataset, an integer.
         @param batch_size: Batch size for training, an integer.
@@ -14,6 +14,8 @@ class BinaryLogisticRegression:
             raise ValueError("`batch_size` must be a positive integer.")
         if not isinstance(conv_threshold, (int, float)) or conv_threshold <= 0:
             raise ValueError("`conv_threshold` must be a positive number.")
+        if not isinstance(max_epochs, int) or max_epochs <= 0:
+            raise ValueError("`max_epochs` must be a positive number.")
         if random_state is not None and not isinstance(random_state, int):
             raise ValueError("`random_state` must be an integer or None.")
             
@@ -22,6 +24,7 @@ class BinaryLogisticRegression:
         self.alpha = 0.03
         self.batch_size = batch_size
         self.conv_threshold = conv_threshold
+        self.max_epochs = max_epochs
         if random_state is not None:
             np.random.seed(random_state)
 
@@ -56,12 +59,11 @@ class BinaryLogisticRegression:
             raise ValueError("`Y` must contain binary labels (0 or 1).")
 
         # intializing values
-        converge = False
         epochs = 0
         n_examples = X.shape[0]
         X_bias = np.hstack([X, np.ones((X.shape[0], 1))])  # Append bias term
 
-        while not converge:
+        for i in range(self.max_epochs):
             # update # of epochs
             epochs +=1
             # acquire indices for shuffling of X and Y
@@ -87,7 +89,7 @@ class BinaryLogisticRegression:
                 self.weights -= ((self.alpha * grad)/ self.batch_size)
             epoch_loss = self.loss(X, Y)
             if abs(epoch_loss - last_epoch_loss) < self.conv_threshold:
-                converge = True
+                break
         return epochs
 
     def loss(self, X, Y):

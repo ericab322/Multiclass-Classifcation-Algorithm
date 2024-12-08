@@ -9,10 +9,12 @@ class TestBinaryLogisticRegression(unittest.TestCase):
         self.n_features = 1
         self.batch_size = 1
         self.conv_threshold = 1e-6
+        self.max_epochs = 100
         self.model = BinaryLogisticRegression(
             n_features=self.n_features,
             batch_size=self.batch_size,
-            conv_threshold=self.conv_threshold
+            conv_threshold=self.conv_threshold,
+            max_epochs = self.max_epochs
         )
 
     def test_loss_initialization(self):

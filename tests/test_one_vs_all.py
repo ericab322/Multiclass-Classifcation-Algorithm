@@ -11,13 +11,12 @@ class TestOneVsAllLogisticRegression(unittest.TestCase):
         self.n_classes = 3
         self.n_features = 2
         self.batch_size = 1
-        self.epochs = 100
         self.model = OneVsAllLogisticRegression(
             n_classes=self.n_classes,
             binary_classifier_class=BinaryLogisticRegression,
             n_features=self.n_features,
             batch_size=self.batch_size,
-            epochs=self.epochs, random_state=42
+            random_state=42
         )
 
     def test_train_creates_correct_classifiers(self):
@@ -108,8 +107,7 @@ class TestOneVsAllLogisticRegression(unittest.TestCase):
                 n_classes=0,  # Invalid
                 binary_classifier_class=BinaryLogisticRegression,
                 n_features=2,
-                batch_size=1,
-                epochs=100
+                batch_size=1
             )
 
     def test_invalid_binary_classifier_class(self):
@@ -119,8 +117,7 @@ class TestOneVsAllLogisticRegression(unittest.TestCase):
                 n_classes=3,
                 binary_classifier_class="NotAClass",  # Invalid
                 n_features=2,
-                batch_size=1,
-                epochs=100
+                batch_size=1
             )
 
     def test_invalid_n_features(self):
@@ -130,8 +127,7 @@ class TestOneVsAllLogisticRegression(unittest.TestCase):
                 n_classes=3,
                 binary_classifier_class=BinaryLogisticRegression,
                 n_features=-1,  # Invalid
-                batch_size=1,
-                epochs=100
+                batch_size=1
             )
 
     def test_invalid_batch_size(self):
@@ -141,8 +137,8 @@ class TestOneVsAllLogisticRegression(unittest.TestCase):
                 n_classes=3,
                 binary_classifier_class=BinaryLogisticRegression,
                 n_features=2,
-                batch_size=0,  # Invalid
-                epochs=100
+                batch_size=0  # Invalid
+
             )
 
     def test_invalid_epochs(self):
@@ -153,7 +149,7 @@ class TestOneVsAllLogisticRegression(unittest.TestCase):
                 binary_classifier_class=BinaryLogisticRegression,
                 n_features=2,
                 batch_size=1,
-                epochs=-10  # Invalid
+                max_epochs=-10  # Invalid
             )
 
     def test_train_empty_data(self):
