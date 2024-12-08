@@ -20,6 +20,6 @@ def preprocess_data(input_path, output_path):
 
 
 if __name__ == "__main__":
-    preprocess_data("./data/raw/obesity_dataset.csv", "./data/processed/obesity_standardized.csv")
+    preprocess_data("../data/raw/obesity_dataset.csv", "../data/processed/obesity_standardized.csv")
 
 
