@@ -27,10 +27,10 @@ class AllPairsLogisticRegression:
             raise ValueError("`conv_threshold` must be a positive number.")
         
         self.n_classes = n_classes
-        self.classifiers = {}  
+        self.classifiers = {}
         self.n_features = n_features
         self.batch_size = batch_size
-        self.max_epochs = max_epochs 
+        self.max_epochs = max_epochs
         self.conv_threshold = conv_threshold
         self.binary_classifier_class = binary_classifier_class
         self.random_state = random_state
