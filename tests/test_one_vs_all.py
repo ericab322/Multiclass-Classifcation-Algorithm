@@ -21,8 +21,8 @@ class TestOneVsAllLogisticRegression(unittest.TestCase):
 
     def test_train_creates_correct_classifiers(self):
         """Test that `train` creates one classifier per class and trains it correctly."""
-        X = np.array([[1, 0], [0, 1], [-1, 0], [2, 0]])  # Data separable
-        Y = np.array([2, 1, 0, 2])  # 3 classes: 0, 1, 2
+        X = np.array([[1, 0], [0, 1], [-1, 0], [2, 0], [0,2], [-2,0]])  # Data separable
+        Y = np.array([2, 1, 0, 2, 1, 0])  # 3 classes: 0, 1, 2
 
         # Train the model
         self.model.train(X, Y)
