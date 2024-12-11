@@ -1,7 +1,7 @@
 import numpy as np
 
 class BinaryLogisticRegression:
-    def __init__(self, n_features, batch_size, conv_threshold = 1e-6, max_epochs = 100, random_state = None):
+    def __init__(self, n_features, batch_size, conv_threshold = 1e-4, max_epochs = 100, random_state = None):
         """Initialize the binary logistic regression model.
         @param n_features: Number of features in the dataset, an integer.
         @param batch_size: Batch size for training, an integer.
@@ -21,7 +21,7 @@ class BinaryLogisticRegression:
             
         self.n_features = n_features
         self.weights = np.zeros(n_features + 1)  # extra element for bias
-        self.alpha = 0.03
+        self.alpha = 0.01
         self.batch_size = batch_size
         self.conv_threshold = conv_threshold
         self.max_epochs = max_epochs

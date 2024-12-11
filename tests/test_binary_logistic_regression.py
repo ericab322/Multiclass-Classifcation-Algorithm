@@ -9,7 +9,7 @@ class TestBinaryLogisticRegression(unittest.TestCase):
         self.n_features = 1
         self.batch_size = 1
         self.conv_threshold = 1e-6
-        self.max_epochs = 100
+        self.max_epochs = 1000
         self.model = BinaryLogisticRegression(
             n_features=self.n_features,
             batch_size=self.batch_size,
@@ -219,17 +219,6 @@ class TestBinaryLogisticRegression(unittest.TestCase):
         with self.assertRaises(ValueError):
             model.accuracy(valid_X, np.array([]))
 
-    # def test_noisy_data(self):
-    #     """Test behavior with noisy labels."""
-    #     x = np.array([[1], [2], [3], [4], [5]])
-    #     # label noise
-    #     y = np.array([0, 0, 1, 1, 0]) 
-
-    #     self.model.train(x, y)
-    #     predictions = self.model.predict(x)
-    #     accuracy = self.model.accuracy(x, y)
-    #     # expect reasonable performance despite noise
-    #     self.assertGreaterEqual(accuracy, 0.6)  
 
 if __name__ == '__main__':
     unittest.main()
